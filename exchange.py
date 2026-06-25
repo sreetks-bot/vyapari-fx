@@ -3,24 +3,25 @@ import sqlite3
 import pandas as pd
 from datetime import datetime
 
-# 1. பக்க வடிவமைப்பு (Page Configuration)
+# 1. பக்க வடிவமைப்பு
 st.set_page_config(
-    page_title="Vyapari FX - Global Ledger",
+    page_title="Dollar-Free Exchange Portal",
     page_icon="🌐",
     layout="centered"
 )
 
-# 2. டேட்டாபேஸ் இணைப்பு (Database Setup)
+# 2. டேட்டாபேஸ் கட்டமைப்பு
 def init_db():
     conn = sqlite3.connect('vyapari_ledger.db')
     cursor = conn.cursor()
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS fx_ledger (
+        CREATE TABLE IF NOT EXISTS global_trades (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            mobile TEXT,
+            sender_mobile TEXT,
+            receiver_mobile TEXT,
+            amount_aed REAL,
             amount_inr REAL,
-            exchange_rate REAL,
-            settlement_status TEXT,
+            usd_fees_saved REAL,
             timestamp TEXT
         )
     ''')
@@ -29,74 +30,85 @@ def init_db():
 
 init_db()
 
-# 3. நேரடி சர்வதேச கரன்சி தரவுகள் (Global FX Rates)
-# நிஜக்கால சர்வதேச மாற்று விகித மதிப்புகள்
-fx_rates = {
-    "AED (UAE Dirham)": 25.77,
-    "USD (US Dollar)": 83.50,
-    "EUR (Euro)": 89.40,
-    "GBP (British Pound)": 105.80,
-    "SAR (Saudi Riyal)": 22.25
-}
+# அசல் மாற்று விகிதம் (1 AED = 25.77 INR)
+FIXED_EXCHANGE_RATE = 25.77
+# டாலர் மூலம் அனுப்பினால் வீணாகும் தோராயமான 3% சர்வதேச வங்கிக் கட்டணம்
+USD_SAVINGS_PERCENT = 0.03 
 
-# --- சர்வதேச கார்ப்பரேட் வடிவமைப்பு (Clean International UI) ---
+# --- அசல் டாலர்-ஃப்ரீ பிளாட்பார வடிவமைப்பு ---
 
-# பிரீமியம் ஹெடர் மற்றும் டைட்டில்
-st.title("🌐 VYAPARI FX")
-st.subheader("International Secure Settlement Desk")
+st.title("🌐 DOLLAR-FREE EXCHANGE")
+st.subheader("International Cross-Border Settlement Desk (Direct AED ⇄ INR)")
+st.write("டாலரின் (USD) தலையீடு இல்லாத நேரடி இருதரப்பு வர்த்தகப் தளம்")
 st.divider()
 
-# 4. சர்வதேச நேரடி மாற்று விகிதப் பலகை (Global FX Board)
-st.markdown("### 📊 GLOBAL EXCHANGE MARKET RATES (INR)")
-cols = st.columns(len(fx_rates))
-for i, (currency, rate) in enumerate(fx_rates.items()):
-    with cols[i]:
-        st.metric(label=currency.split()[0], value=f"{rate} ₹")
+# 3. அப்ளிகேஷன் லெவல் பிசினஸ் கால்குலேட்டர்
+st.markdown("### 🧮 Direct Bilateral Trade Counter")
 
-st.divider()
-
-# 5. கச்சிதமான செட்டில்மெண்ட் கார்டு (Streamlit Container & Form)
-with st.form(key="settlement_form", clear_on_submit=True):
-    st.markdown("### 🔒 Secure Settlement Terminal")
+with st.container():
+    col1, col2 = st.columns(2)
+    with col1:
+        input_aed = st.number_input("Enter Amount in UAE Dirham (AED)", min_value=0.0, step=10.0, format="%.2f")
+    with col2:
+        # டாலர் இல்லாமல் நேரடியாக இந்திய ரூபாயில் கணக்கிடுதல்
+        calculated_inr = input_aed * FIXED_EXCHANGE_RATE
+        st.metric(label="Direct Settlement Value in India (INR)", value=f"{calculated_inr:,.2f} ₹")
     
-    merchant_mobile = st.text_input("Merchant Mobile Number (10 Digits)", max_chars=10)
-    amount_inr = st.number_input("Amount to Settle (INR)", min_value=0.0, step=100.0, format="%.2f")
-    
-    submit_button = st.form_submit_button(label="Execute Secure Settlement")
+    # டாலர் கட்டணம் மிச்சமாவது காட்டும் கவுண்ட்டர்
+    saved_fees = calculated_inr * USD_SAVINGS_PERCENT
+    st.info(f"💡 **USD-Free Advantage:** By avoiding USD conversion, you have saved **{saved_fees:,.2f} ₹** in international banking fees!")
 
-# 6. தரவுச் சேமிப்பு லாஜிக் (Data Processing)
-if submit_button:
-    if len(merchant_mobile) == 10 and merchant_mobile.isdigit() and amount_inr > 0:
-        conn = sqlite3.connect('vyapari_ledger.db')
-        cursor = conn.cursor()
+st.write("---")
+
+# 4. பாதுகாப்பான இருதரப்பு செட்டில்மெண்ட் டெர்மினல்
+with st.form(key="trade_settlement_form", clear_on_submit=True):
+    st.markdown("### 🔒 Execute Direct Country-to-Country Settlement")
+    
+    sender_mob = st.text_input("UAE Merchant Mobile (10 Digits)", max_chars=10)
+    receiver_mob = st.text_input("India Merchant Mobile (10 Digits)", max_chars=10)
+    
+    trade_amount_aed = st.number_input("Final Settlement Amount (AED)", min_value=0.0, step=50.0, format="%.2f")
+    
+    submit_trade = st.form_submit_button(label="Lock Direct Local Currency Settlement")
+
+# 5. தரவுச் சேமிப்பு மற்றும் பாதுகாப்பு லாக்
+if submit_trade:
+    if len(sender_mob) == 10 and len(receiver_mob) == 10 and trade_amount_aed > 0:
+        final_inr = trade_amount_aed * FIXED_EXCHANGE_RATE
+        fees_saved_inr = final_inr * USD_SAVINGS_PERCENT
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
-        # AED ரேட்டை அடிப்படையாகக் கொண்டு செட்டில்மெண்ட் நடக்கிறது
-        live_rate = fx_rates["AED (UAE Dirham)"]
-        
+        conn = sqlite3.connect('vyapari_ledger.db')
+        cursor = conn.cursor()
         cursor.execute('''
-            INSERT INTO fx_ledger (mobile, amount_inr, exchange_rate, settlement_status, timestamp)
-            VALUES (?, ?, ?, ?, ?)
-        ''', (merchant_mobile, amount_inr, live_rate, 'SUCCESS', current_time))
+            INSERT INTO global_trades (sender_mobile, receiver_mobile, amount_aed, amount_inr, usd_fees_saved, timestamp)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (sender_mob, receiver_mob, trade_amount_aed, final_inr, fees_saved_inr, current_time))
         
         conn.commit()
         conn.close()
-        st.success(f"✅ Settlement Processed & Locked Successfully for Merchant: {merchant_mobile}")
+        st.success(f"✅ Trade Secured! Locked {trade_amount_aed} AED directly to {final_inr:,.2f} INR. No USD involved.")
     else:
-        st.error("❌ Invalid Entry. Please check the Mobile Number and Amount.")
+        st.error("❌ Settlement Failed. Please enter valid 10-digit mobile numbers and trade amount.")
 
 st.divider()
 
-# 7. அசல் எக்ஸ்சேஞ்ச் லெட்ஜர் ஹிஸ்டரி (Live Settlement Ledger View)
-st.markdown("### 📑 LIVE SETTLEMENT LEDGER HISTORY")
+# 6. சர்வதேச அசல் செட்டில்மெண்ட் லெட்ஜர் ஹிஸ்டரி
+st.markdown("### 📑 LIVE DOLLAR-FREE SETTLEMENT LEDGER")
 
 conn = sqlite3.connect('vyapari_ledger.db')
-# டேட்டாபேஸில் உள்ள தரவுகளை டேபிளாகக் காட்ட படிக்கிறோம்
-df = pd.read_sql_query("SELECT timestamp AS 'Time Log', mobile AS 'Merchant Mobile', amount_inr AS 'Amount (INR)', exchange_rate AS 'AED Rate', settlement_status AS 'Status' FROM fx_ledger ORDER BY id DESC", conn)
+df = pd.read_sql_query('''
+    SELECT timestamp AS 'Time Log', 
+           sender_mobile AS 'UAE Merchant', 
+           receiver_mobile AS 'India Merchant', 
+           amount_aed AS 'Settled (AED)', 
+           amount_inr AS 'Received (INR)', 
+           usd_fees_saved AS 'Fees Saved (INR)' 
+    FROM global_trades ORDER BY id DESC
+''', conn)
 conn.close()
 
 if not df.empty:
-    # அழகான பிரீமியம் டேபிளாகக் திரையில் காட்டுதல்
     st.dataframe(df, use_container_width=True, hide_index=True)
 else:
-    st.info("ℹ️ No recent settlements found in the local ledger.")
+    st.info("ℹ️ No international bilateral trades recorded in the ledger yet.")
