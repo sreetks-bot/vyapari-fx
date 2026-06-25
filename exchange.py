@@ -3,14 +3,14 @@ import sqlite3
 import pandas as pd
 from datetime import datetime
 
-# 1. சர்வதேச வங்கித் தர வடிவமைப்பு (Enterprise Security Configuration)
+# 1. சர்வதேச நிறுவன வடிவமைப்பு (Enterprise Layout Configuration)
 st.set_page_config(
     page_title="Sovereign Cross-Border Settlement Desk",
     page_icon="🏛️",
     layout="wide"
 )
 
-# 2. அரசு தணிக்கைக்கான பாதுகாப்பான தரவுத்தளம் (Sovereign Audit Database)
+# 2. அரசு தணிக்கைக்கான தரவுத்தளம் (Sovereign Audit Database)
 def init_sovereign_db():
     conn = sqlite3.connect('sovereign_ledger.db')
     cursor = conn.cursor()
@@ -33,12 +33,13 @@ def init_sovereign_db():
 
 init_sovereign_db()
 
+# அசல் பிசினஸ் காரணிகள் (1 AED = 25.77 INR)
 AED_INR_FACTOR = 25.77
 USD_LEAKAGE_SAVINGS_RATE = 0.035
 
-# --- பிரீமியம் கார்ப்பரேட் ஹெடர் ---
-st.markdown("<h2 style='text-align: center; color: #1F6FEB;'>🏛️ SOVEREIGN CROSS-BORDER SETTLEMENT SYSTEM</h2>", unsafe_allow_code_html=True)
-st.markdown("<p style='text-align: center; color: #8B949E; font-size: 14px;'>IFSCA GIFT CITY • CENTRAL BANK REGULATORY SANDBOX FRAMEWORK</p>", unsafe_allow_code_html=True)
+# --- பிரீமியம் கார்ப்பரேட் முகப்பு (பிழையற்ற அசல் ஸ்ட்ரீம்லிட் குறியீடு) ---
+st.title("🏛️ SOVEREIGN CROSS-BORDER SETTLEMENT SYSTEM")
+st.text("IFSCA GIFT CITY • CENTRAL BANK REGULATORY SANDBOX FRAMEWORK")
 st.write("---")
 
 # 3. தொழில்முறை பிரிவுகள் (Professional Separate Desks via Tabs)
@@ -50,7 +51,7 @@ tab1, tab2, tab3 = st.tabs([
 
 # ==================== டெஸ்க் 1: அரசு கொள்கைப்பகுதி ====================
 with tab1:
-    st.markdown("### 📜 Inter-Governmental Bilateral Framework")
+    st.subheader("📜 Inter-Governmental Bilateral Framework")
     st.info("💡 This workstation displays the legal treaty parameters binding the direct netting between India and partner countries.")
     
     col_a, col_b = st.columns(2)
@@ -65,22 +66,23 @@ with tab1:
 
 # ==================== டெஸ்க் 2: வணிகர்களுக்கான வர்த்தகப்பகுதி ====================
 with tab2:
-    st.markdown("### 🔒 Enterprise Local Currency Trade Gateway")
+    st.subheader("🔒 Enterprise Local Currency Trade Gateway")
     st.write("வணிகர்கள் தங்களது லோக்கல் கரன்சியில் நேரடியாக வர்த்தகத்தை லாக் செய்யும் தளம்.")
     
     with st.form(key="sovereign_settlement_form", clear_on_submit=True):
         col1, col2 = st.columns(2)
         
         with col1:
-            st.markdown("##### **Exporter Desk (UAE)**")
+            st.write("##### **Exporter Desk (UAE)**")
             exporter_lei = st.text_input("UAE Corporate LEI Number (20 Characters)", max_chars=20, placeholder="e.g. 123400XXXXXXYYYYZZZZ")
             trade_currency = st.selectbox("Settlement Currency Target", ["AED (UAE Dirham)"])
             amount_local = st.number_input("Trade Volume (In Local Currency)", min_value=0.0, step=1000.0, format="%.2f")
             
         with col2:
-            st.markdown("##### **Importer Desk (India)**")
+            st.write("##### **Importer Desk (India)**")
             importer_lei = st.text_input("India Corporate LEI Number (20 Characters)", max_chars=20, placeholder="e.g. 567800XXXXXXYYYYZZZZ")
             
+            # பாதுகாப்பான கரன்சி கணக்கீடு
             calculated_inr = amount_local * AED_INR_FACTOR
             st.write("")
             st.write("")
@@ -112,7 +114,7 @@ with tab2:
 
 # ==================== டெஸ்க் 3: மத்திய தணிக்கைப்பகுதி ====================
 with tab3:
-    st.markdown("### 📑 Real-Time Audit Trail & Sovereign Ledger")
+    st.subheader("📑 Real-Time Audit Trail & Sovereign Ledger")
     st.write("அரசு அதிகாரிகள் மற்றும் தணிக்கையாளர்கள் மட்டுமே பார்க்கும் பாதுகாப்பான கணக்கு விவரங்கள்.")
     
     conn = sqlite3.connect('sovereign_ledger.db')
@@ -126,7 +128,7 @@ with tab3:
                usd_leakage_saved AS 'USD Cost Saved (INR)',
                escrow_status AS 'Escrow Status'
         FROM sovereign_trades ORDER BY id DESC
-    ''', conn)
+''', conn)
     conn.close()
 
     if not df.empty:
