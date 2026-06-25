@@ -3,7 +3,7 @@ import sqlite3
 import pandas as pd
 from datetime import datetime
 
-# 1. சர்வதேச நிறுவன வடிவமைப்பு (Enterprise Configuration)
+# 1. சர்வதேச நிறுவன வடிவமைப்பு (Enterprise Layout Configuration)
 st.set_page_config(
     page_title="Sovereign Cross-Border Settlement Desk",
     page_icon="🏛️",
@@ -38,11 +38,10 @@ AED_INR_FACTOR = 25.77
 # டாலர் கன்வெர்ஷன் மற்றும் SWIFT இடைத்தரகர் கட்டணச் சேமிப்பு (3.5%)
 USD_LEAKAGE_SAVINGS_RATE = 0.035
 
-# --- பிரீமியம் கார்ப்பரேட் முகப்புத் திரை ---
-
-st.markdown("<h1 style='text-align: center; color: #1F6FEB;'>🏛️ SOVEREIGN CROSS-BORDER SETTLEMENT DESK</h1>", unsafe_allow_code_html=True)
-st.markdown("<p style='text-align: center; color: #8B949E; font-size: 16px;'>IFSCA GIFT CITY • FINANCIAL SANDBOX PROTOCOL (DIRECT LOCAL CURRENCY SETTLEMENT)</p>", unsafe_allow_code_html=True)
-st.write("---")
+# --- பிரீமியம் கார்ப்பரேட் முகப்புத் திரை (பிழையற்ற ஸ்ட்ரீம்லிட் டைட்டில்) ---
+st.title("🏛️ SOVEREIGN CROSS-BORDER SETTLEMENT DESK")
+st.caption("IFSCA GIFT CITY • FINANCIAL SANDBOX PROTOCOL (DIRECT LOCAL CURRENCY SETTLEMENT)")
+st.divider()
 
 # 3. தூண் 1: அரசாங்க மற்றும் மத்திய வங்கிகளின் கொள்கை காப்பகம் (Sovereign Regulatory Framework)
 st.markdown("### 📜 1. Inter-Governmental Bilateral Framework")
@@ -57,7 +56,7 @@ with st.expander("ℹ️ View Central Bank Framework & MoU Details (RBI & UAE-CB
         st.write("**Risk Mitigation:** Zero Exchange Rate Risk via Pre-Hedging Mechanisms")
         st.write("**Compliance:** AML / CFT Compliant via Legal Entity Identifier (LEI) Validation")
 
-st.write("---")
+st.divider()
 
 # 4. தூண் 2: நிறுவனங்களுக்கான அசல் செட்டில்மெண்ட் டெர்மினல் (Enterprise Settlement Counter)
 st.markdown("### 🔒 2. Enterprise Local Currency Trade Execution")
@@ -66,18 +65,19 @@ with st.form(key="sovereign_settlement_form", clear_on_submit=True):
     col1, col2 = st.columns(2)
     
     with col1:
-        st.markdown("#### Exporter Desk (UAE)")
+        st.markdown("##### **Exporter Desk (UAE)**")
         exporter_lei = st.text_input("UAE Corporate LEI Number (20 Characters)", max_chars=20, placeholder="e.g. 123400XXXXXXYYYYZZZZ")
         trade_currency = st.selectbox("Settlement Currency Target", ["AED (UAE Dirham)"])
         amount_local = st.number_input("Trade Volume (In Local Currency)", min_value=0.0, step=1000.0, format="%.2f")
         
     with col2:
-        st.markdown("#### Importer Desk (India)")
+        st.markdown("##### **Importer Desk (India)**")
         importer_lei = st.text_input("India Corporate LEI Number (20 Characters)", max_chars=20, placeholder="e.g. 567800XXXXXXYYYYZZZZ")
         
         # டாலர் இல்லாத நேரடி இந்திய ரூபாய் கணக்கீடு
         calculated_inr = amount_local * AED_INR_FACTOR
-        st.markdown("<br><br>", unsafe_allow_code_html=True)
+        st.write("")
+        st.write("")
         st.metric(label="Direct Sovereign Netting Value (INR)", value=f"{calculated_inr:,.2f} ₹")
 
     st.write("---")
@@ -104,12 +104,12 @@ if submit_sovereign_trade:
         conn.commit()
         conn.close()
         
-        st.success(f"⚖️ TRANSACTION SECURED BY SOVEREIGN FRAMEWORK!")
+        st.success("⚖️ TRANSACTION SECURED BY SOVEREIGN FRAMEWORK!")
         st.info(f"**Ref ID:** {framework_id} | **Status:** Escrow Cleared via Direct Central Bank Route. **USD Leakage Prevented:** {usd_saved:,.2f} ₹")
     else:
         st.error("❌ Compliance Rejection. Please enter the valid 20-digit Corporate LEI numbers and Trade Volume.")
 
-st.write("---")
+st.divider()
 
 # 6. தூண் 3: அரசு தணிக்கை மற்றும் லெட்ஜர் (Sovereign Audit Trail & Ledger)
 st.markdown("### 📑 3. Sovereign Audit Trail (Live Settlement Ledger)")
